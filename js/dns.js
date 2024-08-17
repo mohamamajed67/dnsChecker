@@ -8,6 +8,7 @@ async function getDnsInfo(domain, recordType) {
 
 document.getElementById('search-form').addEventListener('submit', (event) => {
     event.preventDefault();
+    document.getElementById('results').classList.remove('hidden');
     handleSearchButtonClick();
 });
 
