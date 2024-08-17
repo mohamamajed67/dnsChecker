@@ -1,0 +1,206 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+:root {
+    --bg-color: #0f0f1e;
+    --text-color: #e0e0e0;
+    --primary-color: #8a2be2;
+    --secondary-color: #00ffff;
+    --accent-color: #ff4081;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image:
+        radial-gradient(circle at 10% 20%, rgba(138, 43, 226, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(0, 255, 255, 0.2) 0%, transparent 50%);
+}
+
+.container {
+    width: 90%;
+    max-width: 800px;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+    font-size: 2.1rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--secondary-color);
+    text-shadow: 0 0 10px var(--secondary-color);
+}
+
+.search-form {
+    display: flex;
+    margin-bottom: 2rem;
+}
+
+input[type="text"] {
+    flex-grow: 1;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+    border-radius: 50px 0 0 50px;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+button {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    border: none;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 0 50px 50px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.results {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 1.5rem;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+th {
+    background-color: rgba(255, 255, 255, 0.1);
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.copy-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    margin-left: 10px;
+    fill: var(--text-color);
+    transition: fill 0.3s ease;
+}
+
+.copy-btn:hover {
+    background: none;
+    fill: var(--accent-color);
+}
+
+.copy-btn svg {
+    background: none;
+    fill: var(--secondary-color);
+}
+
+.copy-btn:hover svg {
+    fill: var(--accent-color);
+}
+
+.loading {
+    text-align: center;
+    font-size: 1.2rem;
+    display: none;
+}
+
+.loading::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--secondary-color);
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+    margin-left: 10px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 600px) {
+    .search-form {
+        flex-direction: column;
+    }
+
+    input[type="text"],
+    button {
+        border-radius: 50px;
+        margin-bottom: 1rem;
+    }
+}
+
+.copy-tooltip {
+    position: absolute;
+    top: -30px;
+    right: 0;
+    background-color: #ffffff;
+    color: #764ba2;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.copy-btn {
+    position: relative;
+}
+
+/* Thêm các styles mới để cắt ngắn nội dung */
+.truncate {
+    max-width: 405px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+}
+
+.truncate:hover::after {
+    content: attr(data-full-text);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding: 5px;
+    border-radius: 4px;
+    z-index: 1;
+    white-space: normal;
+    word-break: break-all;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    max-width: 300px;
+}

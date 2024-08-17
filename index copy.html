@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNS Checker | Di9x</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        :root {
+            --bg-color: #0f0f1e;
+            --text-color: #e0e0e0;
+            --primary-color: #8a2be2;
+            --secondary-color: #00ffff;
+            --accent-color: #ff4081;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(138, 43, 226, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(0, 255, 255, 0.2) 0%, transparent 50%);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            font-size: 2.1rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--secondary-color);
+            text-shadow: 0 0 10px var(--secondary-color);
+        }
+
+        .search-form {
+            display: flex;
+            margin-bottom: 2rem;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            border-radius: 50px 0 0 50px;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
+        button {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            border: none;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 0 50px 50px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .results {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            background-color: rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            margin-left: 10px;
+            fill: var(--text-color);
+            transition: fill 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: none;
+            fill: var(--accent-color);
+        }
+
+        .copy-btn svg {
+            background: none;
+            fill: var(--secondary-color);
+        }
+
+        .copy-btn:hover svg {
+            fill: var(--accent-color);
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 1.2rem;
+            display: none;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--secondary-color);
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .search-form {
+                flex-direction: column;
+            }
+
+            input[type="text"],
+            button {
+                border-radius: 50px;
+                margin-bottom: 1rem;
+            }
+        }
+
+        .copy-tooltip {
+            position: absolute;
+            top: -30px;
+            right: 0;
+            background-color: #ffffff;
+            color: #764ba2;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .copy-btn {
+            position: relative;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>DNS Checker</h1>
+        <form id="search-form" class="search-form">
+            <input type="text" id="domainInput" placeholder="Nhập tên miền hoặc địa chỉ IP..." required>
+            <button type="submit">Search</button>
+        </form>
+        <div class="loading" id="loading">DNS Loading...</div>
+        <div class="results">
+            <table id="dns-result">
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        async function getDnsInfo(domain, recordType) {
+            const apiUrl = `https://dns.google.com/resolve?name=${domain}&type=${recordType}`;
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            return data;
+        }
+
+        document.getElementById('search-form').addEventListener('submit', (event) => {
+            event.preventDefault();
+            handleSearchButtonClick();
+        });
+
+        function copyTextToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        }
+
+
+        function createCopyButton(value, type) {
+            const button = document.createElement('button');
+            button.className = 'copy-btn';
+            button.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path>
+        </svg>
+        <div class="copy-tooltip">Copied!</div>
+    `;
+
+            button.addEventListener('click', () => {
+                let copiedValue = value.trim();
+
+                if (type === 'MX') {
+                    const match = value.match(/^\s*\d+\s+(.+)/);
+                    if (match) {
+                        copiedValue = match[1];
+                    }
+                }
+
+                copiedValue = copiedValue.replace(/^\s*\d+\s+/, '');
+
+                if (copiedValue.endsWith('.')) {
+                    copiedValue = copiedValue.slice(0, -1);
+                }
+
+                navigator.clipboard.writeText(copiedValue).then(() => {
+                    const tooltip = button.querySelector('.copy-tooltip');
+                    tooltip.style.opacity = 1;
+                    setTimeout(() => {
+                        tooltip.style.opacity = 0;
+                    }, 2000); // Hiển thị thông báo trong 2 giây
+                });
+            });
+
+            return button;
+        }
+
+
+
+        function recordTypeNumberToName(typeNumber) {
+            const dnsRecordTypes = {
+                1: 'A',
+                2: 'NS',
+                5: 'CNAME',
+                6: 'SOA',
+                12: 'PTR',
+                15: 'MX',
+                16: 'TXT',
+                28: 'AAAA',
+                33: 'SRV',
+                43: 'DS',
+                46: 'RRSIG',
+                48: 'DNSKEY',
+                256: 'CAA',
+                257: 'CAA',
+            };
+
+            return dnsRecordTypes[typeNumber] || typeNumber;
+        }
+
+        function isIPv4Address(ip) {
+            const ipv4Regex = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+            return ipv4Regex.test(ip);
+        }
+
+        function reverseIP(ip) {
+            return ip.split('.').reverse().join('.');
+        }
+
+        function isIPv6Address(ip) {
+            const ipv6Regex = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|(:(:[0-9a-fA-F]{1,4}){1,7}|:))$/;
+            return ipv6Regex.test(ip);
+        }
+
+        function reverseIPv6(ip) {
+            const expandedIPv6 = ip.replace(/::/g, (match, offset, string) => {
+                let fill = '';
+                const fillCount = 9 - string.split(':').length;
+                for (let i = 0; i < fillCount; i++) {
+                    fill += ':0000';
+                }
+                return fill;
+            });
+            const octets = expandedIPv6.split(':');
+            let reversed = '';
+            for (const octet of octets) {
+                reversed = octet.split('').reverse().join('') + '.' + reversed;
+            }
+            return reversed + 'ip6.arpa';
+        }
+
+        function addRecordToTable(record, dnsResultElement) {
+            const row = document.createElement('tr');
+            const nameCell = document.createElement('td');
+            nameCell.textContent = record.name;
+            row.appendChild(nameCell);
+
+            const typeCell = document.createElement('td');
+            const typeName = recordTypeNumberToName(record.type);
+            typeCell.textContent = typeName;
+            row.appendChild(typeCell);
+
+            const valueCell = document.createElement('td');
+            valueCell.textContent = record.data;
+            row.appendChild(valueCell);
+
+            const copyCell = document.createElement('td');
+            const copyButton = createCopyButton(`${record.data}`, typeName);
+            copyCell.appendChild(copyButton);
+            row.appendChild(copyCell);
+
+            dnsResultElement.appendChild(row);
+        }
+
+        async function handleSearchButtonClick() {
+            const domainInput = document.querySelector('input[type="text"]');
+            const userInput = domainInput.value.trim();
+            if (!userInput) {
+                alert('Vui lòng nhập tên miền hoặc địa chỉ IP');
+                return;
+            }
+
+            const dnsResultElement = document.getElementById('dns-result').tBodies[0];
+            dnsResultElement.innerHTML = '';
+            const loadingElement = document.getElementById('loading');
+            loadingElement.style.display = 'block';
+
+            try {
+                let domain = userInput;
+                let mailDomain = `mail.${userInput}`;
+                let recordTypes = ['NS', 'A', 'MX', 'TXT', 'CNAME', 'SOA', 'PTR'];
+
+                if (isIPv4Address(userInput)) {
+                    domain = reverseIP(userInput) + '.in-addr.arpa';
+                    recordTypes = ['PTR', 'SOA'];
+                } else if (isIPv6Address(userInput)) {
+                    domain = reverseIPv6(userInput);
+                    recordTypes = ['PTR', 'SOA'];
+                }
+
+                const mailDnsInfo = await getDnsInfo(mailDomain, 'A');
+                const mailRecords = mailDnsInfo.Answer || [];
+                mailRecords.forEach(record => addRecordToTable(record, dnsResultElement));
+
+                for (const recordType of recordTypes) {
+                    const dnsInfo = await getDnsInfo(domain, recordType);
+                    const records = dnsInfo.Answer || [];
+
+                    if (dnsInfo.Authority && dnsInfo.Authority.length > 0 && recordType === 'SOA') {
+                        dnsInfo.Authority.forEach(record => {
+                            if (record.type === 6) {
+                                records.push(record);
+                            }
+                        });
+                    }
+
+                    records.forEach(record => addRecordToTable(record, dnsResultElement));
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Có lỗi xảy ra, vui lòng thử lại');
+            } finally {
+                loadingElement.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+
+</html>
