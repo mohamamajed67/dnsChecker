@@ -1,0 +1,55 @@
+ <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <!-- Gradient hiện đại hơn với 3 màu -->
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#6366F1;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#8B5CF6;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#EC4899;stop-opacity:1" />
+            </linearGradient>
+            
+            <!-- Glow effect -->
+            <filter id="glow">
+                <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+                <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+        </defs>
+        
+        <!-- Hình lục giác nền với bo góc -->
+        <path d="M16 2 
+                 L27.3 8.5 
+                 Q28 9 28 9.7
+                 L28 22.3
+                 Q28 23 27.3 23.5
+                 L16 30
+                 L4.7 23.5
+                 Q4 23 4 22.3
+                 L4 9.7
+                 Q4 9 4.7 8.5
+                 Z" 
+              fill="url(#grad1)"/>
+              
+        <!-- Pattern trang trí -->
+        <path d="M16 6 L24 10.5 L24 19.5 L16 24 L8 19.5 L8 10.5 Z" 
+              fill="none" 
+              stroke="rgba(255,255,255,0.8)" 
+              stroke-width="0.3"
+              stroke-dasharray="1 1"/>
+              
+        <path d="M16 8 L22 11.5 L22 18.5 L16 22 L10 18.5 L10 11.5 Z" 
+              fill="none" 
+              stroke="rgba(255,255,255,0.6)" 
+              stroke-width="0.2"
+              stroke-dasharray="1 1"/>
+              
+        <!-- Chữ D9 với style hiện đại -->
+        <text x="16" y="19.5"
+              font-family="Inter, system-ui, sans-serif"
+              font-size="11"
+              font-weight="700"
+              text-anchor="middle"
+              fill="#fff"
+              filter="url(#glow)">D9</text>
+    </svg>
