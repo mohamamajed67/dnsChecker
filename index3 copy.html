@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced DNS & Tenant Tools</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        :root {
+            --bg-color: #0f0f1e;
+            --text-color: #e0e0e0;
+            --primary-color: #8a2be2;
+            --secondary-color: #00ffff;
+            --accent-color: #ff4081;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(138, 43, 226, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(0, 255, 255, 0.2) 0%, transparent 50%);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--secondary-color);
+            text-shadow: 0 0 10px var(--secondary-color);
+        }
+
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .tab-button {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button:first-child {
+            border-radius: 50px 0 0 50px;
+        }
+
+        .tab-button:last-child {
+            border-radius: 0 50px 50px 0;
+        }
+
+        .tab-button.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+            font-weight: 300;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 1rem 3rem 1rem 1rem;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
+        button[type="submit"] {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 0.8rem;
+            border: none;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button[type="submit"]:hover {
+            background: var(--accent-color);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .results {
+            margin-top: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            position: relative;
+        }
+
+        .result-item {
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .result-label {
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .copy-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            fill: var(--text-color);
+            transition: fill 0.3s ease;
+        }
+
+        .copy-icon:hover {
+            fill: var(--accent-color);
+        }
+
+        .copy-tooltip {
+            position: absolute;
+            top: -30px;
+            right: 0;
+            background-color: var(--text-color);
+            color: var(--bg-color);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .copy-tooltip.show {
+            opacity: 1;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th,
+        td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .truncate {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .copy-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--text-color);
+        }
+
+        #loading {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        #error-message {
+            color: var(--accent-color);
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .tab-button {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Di9x Tools</h1>
+        <div class="tab-container">
+            <button id="dns-toggle" class="tab-button active">DNS Checker</button>
+            <button id="tenant-toggle" class="tab-button">Tenant Lookup</button>
+            
+        </div>
+
+        <form id="search-form" class="fade-in">
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input type="text" id="search-input" placeholder="Enter domain or IP address" required>
+                    <button type="submit">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <div id="loading" class="hidden">Loading...</div>
+        <div id="error-message" class="hidden">An error occurred. Please try again.</div>
+
+        <div id="results" class="results hidden fade-in">
+            <div id="dns-results">
+                <table id="dns-result">
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div id="tenant-results" class="hidden">
+                <div class="result-item">
+                    <span class="result-label">Tenant Name:</span>
+                    <span id="search-string"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Tenant ID:</span>
+                    <span id="tenant-id"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Tenant Root:</span>
+                    <span id="root-tenant"></span>
+                </div>
+            </div>
+            <svg class="copy-icon" onclick="copyResults()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                width="24" height="24">
+                <path
+                    d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+            </svg>
+            <div class="copy-tooltip">Copied!</div>
+        </div>
+
+
+        <script>
+            // DNS Checker code
+            async function getDnsInfo(domain, recordType) {
+                const apiUrl = `https://dns.google.com/resolve?name=${domain}&type=${recordType}`;
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                return data;
+            }
+
+            document.getElementById('search-form').addEventListener('submit', (event) => {
+                event.preventDefault();
+                document.getElementById('results').style.display = 'block';
+                if (document.getElementById('dns-toggle').classList.contains('active')) {
+                    handleDnsSearch();
+                } else {
+                    lookupTenant();
+                }
+            });
+
+            function copyTextToClipboard(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            }
+
+            function createCopyButton(value, type) {
+                const button = document.createElement('button');
+                button.className = 'copy-btn';
+                button.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path>
+                </svg>
+                <div class="copy-tooltip">Copied!</div>
+            `;
+
+                button.addEventListener('click', () => {
+                    let copiedValue = value.trim();
+
+                    if (type === 'MX') {
+                        const match = value.match(/^\s*\d+\s+(.+)/);
+                        if (match) {
+                            copiedValue = match[1];
+                        }
+                    }
+
+                    copiedValue = copiedValue.replace(/^\s*\d+\s+/, '');
+
+                    if (copiedValue.endsWith('.')) {
+                        copiedValue = copiedValue.slice(0, -1);
+                    }
+
+                    navigator.clipboard.writeText(copiedValue).then(() => {
+                        const tooltip = button.querySelector('.copy-tooltip');
+                        tooltip.style.opacity = 1;
+                        setTimeout(() => {
+                            tooltip.style.opacity = 0;
+                        }, 2000);
+                    });
+                });
+
+                return button;
+            }
+
+            function recordTypeNumberToName(typeNumber) {
+                const dnsRecordTypes = {
+                    1: 'A', 2: 'NS', 5: 'CNAME', 6: 'SOA', 12: 'PTR', 15: 'MX', 16: 'TXT',
+                    28: 'AAAA', 33: 'SRV', 43: 'DS', 46: 'RRSIG', 48: 'DNSKEY', 256: 'CAA', 257: 'CAA',
+                };
+                return dnsRecordTypes[typeNumber] || typeNumber;
+            }
+
+            function isIPv4Address(ip) {
+                const ipv4Regex = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+                return ipv4Regex.test(ip);
+            }
+
+            function reverseIP(ip) {
+                return ip.split('.').reverse().join('.');
+            }
+
+            function isIPv6Address(ip) {
+                const ipv6Regex = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|(:(:[0-9a-fA-F]{1,4}){1,7}|:))$/;
+                return ipv6Regex.test(ip);
+            }
+
+            function reverseIPv6(ip) {
+                const expandedIPv6 = ip.replace(/::/g, (match, offset, string) => {
+                    let fill = '';
+                    const fillCount = 9 - string.split(':').length;
+                    for (let i = 0; i < fillCount; i++) {
+                        fill += ':0000';
+                    }
+                    return fill;
+                });
+                const octets = expandedIPv6.split(':');
+                let reversed = '';
+                for (const octet of octets) {
+                    reversed = octet.split('').reverse().join('') + '.' + reversed;
+                }
+                return reversed + 'ip6.arpa';
+            }
+
+            function addRecordToTable(record, dnsResultElement) {
+                const row = document.createElement('tr');
+                const typeCell = document.createElement('td');
+                const typeName = recordTypeNumberToName(record.type);
+                typeCell.textContent = typeName;
+                row.appendChild(typeCell);
+
+                const valueCell = document.createElement('td');
+                valueCell.className = 'truncate';
+                valueCell.textContent = record.data;
+                valueCell.setAttribute('data-full-text', record.data);
+                row.appendChild(valueCell);
+
+                const copyCell = document.createElement('td');
+                const copyButton = createCopyButton(`${record.data}`, typeName);
+                copyCell.appendChild(copyButton);
+                row.appendChild(copyCell);
+
+                dnsResultElement.appendChild(row);
+            }
+
+            async function handleDnsSearch() {
+                const domainInput = document.getElementById('search-input');
+                const userInput = domainInput.value.trim();
+                if (!userInput) {
+                    alert('Please enter a domain or IP address');
+                    return;
+                }
+
+                const dnsResultElement = document.getElementById('dns-result').tBodies[0];
+                dnsResultElement.innerHTML = '';
+                const loadingElement = document.getElementById('loading');
+                loadingElement.style.display = 'block';
+                document.getElementById('error-message').style.display = 'none';
+                document.getElementById('dns-results').style.display = 'block';
+                document.getElementById('tenant-results').style.display = 'none';
+
+                try {
+                    let domain = userInput;
+                    let mailDomain = `mail.${userInput}`;
+                    let recordTypes = ['NS', 'A', 'MX', 'TXT', 'CNAME', 'SOA', 'PTR'];
+
+                    if (isIPv4Address(userInput)) {
+                        domain = reverseIP(userInput) + '.in-addr.arpa';
+                        recordTypes = ['PTR', 'SOA'];
+                    } else if (isIPv6Address(userInput)) {
+                        domain = reverseIPv6(userInput);
+                        recordTypes = ['PTR', 'SOA'];
+                    }
+
+                    const mailDnsInfo = await getDnsInfo(mailDomain, 'A');
+                    const mailRecords = mailDnsInfo.Answer || [];
+                    mailRecords.forEach(record => addRecordToTable(record, dnsResultElement));
+
+                    for (const recordType of recordTypes) {
+                        const dnsInfo = await getDnsInfo(domain, recordType);
+                        const records = dnsInfo.Answer || [];
+
+                        if (dnsInfo.Authority && dnsInfo.Authority.length > 0 && recordType === 'SOA') {
+                            dnsInfo.Authority.forEach(record => {
+                                if (record.type === 6) {
+                                    records.push(record);
+                                }
+                            });
+                        }
+
+                        records.forEach(record => addRecordToTable(record, dnsResultElement));
+                    }
+
+                    document.getElementById('results').style.display = 'block';
+                } catch (error) {
+                    console.error(error);
+                    document.getElementById('error-message').style.display = 'block';
+                } finally {
+                    loadingElement.style.display = 'none';
+                }
+            }
+
+            // Tenant Lookup code
+            async function lookupTenant() {
+                var tenant = document.getElementById('search-input').value.trim();
+                var resultsDiv = document.getElementById('results');
+                var errorMessageDiv = document.getElementById('error-message');
+                var loadingElement = document.getElementById('loading');
+
+                resetView();
+                loadingElement.style.display = 'block';
+                document.getElementById('dns-results').style.display = 'none';
+                document.getElementById('tenant-results').style.display = 'block';
+
+                var lookupUrl = "https://login.microsoftonline.com/" + tenant + "/.well-known/openid-configuration";
+
+                try {
+                    const response = await fetch(lookupUrl);
+                    if (!response.ok) {
+                        throw new Error('Lookup failed');
+                    }
+                    const data = await response.json();
+
+                    var tenantIdRegEx = /^https:\/\/login\.microsoftonline\.(?:us|com)\/([\dA-Fa-f]{8}-[\dA-Fa-f]{4}-[\dA-Fa-f]{4}-[\dA-Fa-f]{4}-[\dA-Fa-f]{12})\/oauth2\/authorize$/;
+                    var tenantAuthEndpoint = data.authorization_endpoint;
+                    var tenantId = tenantAuthEndpoint.match(tenantIdRegEx)[1];
+
+                    document.getElementById("search-string").textContent = tenant;
+                    document.getElementById("tenant-id").textContent = tenantId;
+
+                    // Fetch root tenant information
+                    const rootTenant = await getRootTenant(tenantId);
+                    document.getElementById("root-tenant").textContent = rootTenant;
+
+                    resultsDiv.style.display = 'block';
+                } catch (error) {
+                    handleError();
+                } finally {
+                    loadingElement.style.display = 'none';
+                }
+            }
+
+            async function getRootTenant(tenantId) {
+                const apiUrl = `https://gist.githubusercontent.com/mohamamajed67/e1bdc5b9bf8295f39da0847c6a34e57b/raw/7b29e8ab561eb11d128e1477dd074bebad738ed3/id`;
+                try {
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch CSV data');
+                    }
+                    const csvText = await response.text();
+                    const csvData = parseCSV(csvText);
+
+                    const matchingRow = csvData.find(row => row.ID === tenantId);
+                    return matchingRow ? matchingRow.Tenant : "Unknown";
+                } catch (error) {
+                    console.error('Error fetching root tenant:', error);
+                    return "Unknown";
+                }
+            }
+
+            function parseCSV(csvText) {
+                const lines = csvText.split('\n');
+                const headers = lines[0].split(',');
+                return lines.slice(1).map(line => {
+                    const values = line.split(',');
+                    return headers.reduce((obj, header, index) => {
+                        obj[header.trim()] = values[index] ? values[index].trim() : '';
+                        return obj;
+                    }, {});
+                });
+            }
+
+            function handleError() {
+                resetView();
+                document.getElementById('error-message').style.display = 'block';
+            }
+
+            function resetView() {
+                document.getElementById('results').style.display = 'none';
+                document.getElementById('error-message').style.display = 'none';
+            }
+
+            function copyResults() {
+                var resultsText = `
+                Tenant Name: ${document.getElementById('search-string').textContent}
+                Tenant ID: ${document.getElementById('tenant-id').textContent}
+                Tenant Root: ${document.getElementById('root-tenant').textContent}
+            `;
+                navigator.clipboard.writeText(resultsText).then(function () {
+                    showCopyTooltip();
+                }, function (err) {
+                    console.error('Failed to copy results: ', err);
+                });
+            }
+
+            function showCopyTooltip() {
+                var tooltip = document.querySelector('.copy-tooltip');
+                tooltip.classList.add('show');
+                setTimeout(() => {
+                    tooltip.classList.remove('show');
+                }, 2000);
+            }
+
+            // Toggle between DNS Checker and Tenant Lookup
+            document.getElementById('dns-toggle').addEventListener('click', function () {
+                this.classList.add('active');
+                document.getElementById('tenant-toggle').classList.remove('active');
+                document.getElementById('search-input').placeholder = "Enter domain or IP address";
+                resetView();
+            });
+
+            document.getElementById('tenant-toggle').addEventListener('click', function () {
+                this.classList.add('active');
+                document.getElementById('dns-toggle').classList.remove('active');
+                document.getElementById('search-input').placeholder = "contoso.onmicrosoft.com";
+                resetView();
+            });
+        </script>
+</body>
+
+</html>

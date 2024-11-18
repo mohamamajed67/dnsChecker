@@ -1,12 +1,10 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNS Checker & Tenant Lookup | Di9x</title>
-    <script src="E:\Project_PS_Sheet\New folder\dnsChecker\scripts.js"></script>
-    <script src="E:\Project_PS_Sheet\New folder\tenantIDcheck\script\scripts.js"></script>
+    <title>Advanced DNS & Tenant Tools</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
@@ -28,8 +26,6 @@
             font-family: 'Poppins', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            margin: 0;
-            padding: 0;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -50,44 +46,45 @@
         }
 
         h1 {
-            font-size: 2.1rem;
+            font-size: 2rem;
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
             color: var(--secondary-color);
             text-shadow: 0 0 10px var(--secondary-color);
         }
 
-        .toggle-container {
+        .tab-container {
             display: flex;
             justify-content: center;
             margin-bottom: 2rem;
         }
 
-        .toggle-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            padding: 0.8rem 1.5rem;
-            color: var(--text-color);
+        .tab-button {
+            padding: 0.5rem 1rem;
             font-size: 1rem;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .toggle-btn:first-child {
+        .tab-button:first-child {
             border-radius: 50px 0 0 50px;
         }
 
-        .toggle-btn:last-child {
+        .tab-button:last-child {
             border-radius: 0 50px 50px 0;
         }
 
-        .toggle-btn.active {
+        .tab-button.active {
             background: var(--primary-color);
             color: white;
         }
 
         .form-group {
             margin-bottom: 1.5rem;
+            position: relative;
         }
 
         label {
@@ -97,108 +94,93 @@
             font-weight: 300;
         }
 
-        input[type="text"], select {
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input[type="text"],
+        select {
             width: 100%;
-            padding: 1rem 1.5rem;
-            font-size: 1rem;
+            padding: 1rem 3rem 1rem 1rem;
             border: none;
+            border-radius: 50px;
             background: rgba(255, 255, 255, 0.1);
             color: var(--text-color);
-            border-radius: 50px;
+            font-size: 1rem;
             transition: all 0.3s ease;
         }
 
-        input[type="text"]:focus, select:focus {
+        input[type="text"]:focus,
+        select:focus {
             outline: none;
+            background: rgba(255, 255, 255, 0.2);
             box-shadow: 0 0 0 2px var(--primary-color);
         }
 
         button[type="submit"] {
-            width: 100%;
-            padding: 1rem 2rem;
-            font-size: 1rem;
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 0.8rem;
             border: none;
+            border-radius: 50%;
             background: var(--primary-color);
             color: white;
-            border-radius: 50px;
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         button[type="submit"]:hover {
             background: var(--accent-color);
-            transform: translateY(-2px);
+            transform: translateY(-50%) scale(1.05);
         }
 
-        .results, #tenant-results {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 1.5rem;
-            overflow-x: auto;
+        .results {
             margin-top: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            position: relative;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .result-item {
+            margin-bottom: 1rem;
+            color: var(--text-color);
         }
 
-        th, td {
-            padding: 0.75rem;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        th {
-            background-color: rgba(255, 255, 255, 0.1);
+        .result-label {
             font-weight: 600;
-            color: var(--accent-color);
+            margin-right: 0.5rem;
         }
 
-        .copy-btn {
-            background: none;
-            border: none;
-            padding: 0;
+        .copy-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
             cursor: pointer;
-            margin-left: 10px;
+            width: 24px;
+            height: 24px;
             fill: var(--text-color);
             transition: fill 0.3s ease;
         }
 
-        .copy-btn:hover {
+        .copy-icon:hover {
             fill: var(--accent-color);
-        }
-
-        .loading {
-            text-align: center;
-            font-size: 1.2rem;
-            display: none;
-        }
-
-        .loading::after {
-            content: '';
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid var(--secondary-color);
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s linear infinite;
-            margin-left: 10px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
         }
 
         .copy-tooltip {
             position: absolute;
             top: -30px;
             right: 0;
-            background-color: #ffffff;
-            color: #764ba2;
+            background-color: var(--text-color);
+            color: var(--bg-color);
             padding: 5px 10px;
             border-radius: 4px;
             font-size: 12px;
@@ -210,59 +192,35 @@
             opacity: 1;
         }
 
-        .truncate {
-            max-width: 405px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            position: relative;
-        }
-
-        .truncate:hover::after {
-            content: attr(data-full-text);
-            position: absolute;
-            left: 0;
-            top: 100%;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            padding: 5px;
-            border-radius: 4px;
-            z-index: 1;
-            white-space: normal;
-            word-break: break-all;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            max-width: 300px;
-        }
-
-        #tenant-results {
+        .hidden {
             display: none;
         }
 
-        .result-item {
-            margin-bottom: 1rem;
-            color: var(--text-color);
-        }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5rem;
+            }
 
-        .result-label {
-            font-weight: 600;
-            margin-right: 0.5rem;
-            color: var(--secondary-color);
-        }
+            .container {
+                padding: 1rem;
+            }
 
-        #error-message {
-            margin-top: 2rem;
-            color: #ff4f4f;
-            font-weight: 600;
-            display: none;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 1rem;
+            .tab-button {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .fade-in {
@@ -273,124 +231,93 @@
 
 <body>
     <div class="container">
-        <h1>DNS Checker & Tenant Lookup</h1>
-        <div class="toggle-container">
-            <button class="toggle-btn active" onclick="switchToTab('dns')">DNS Checker</button>
-            <button class="toggle-btn" onclick="switchToTab('tenant')">Tenant Lookup</button>
+        <h1>Advanced DNS & Tenant Tools</h1>
+        <div class="tab-container">
+            <button class="tab-button active" onclick="switchTab('dns')">DNS Checker</button>
+            <button class="tab-button" onclick="switchTab('tenant')">Tenant Lookup</button>
         </div>
-        
+
         <!-- DNS Checker Form -->
-        <form id="dns-form" class="search-form">
+        <form id="dns-form" class="fade-in">
             <div class="form-group">
-                <input type="text" id="domainInput" placeholder="Nhập tên miền hoặc địa chỉ IP..." required>
+                <label for="domainInput">Domain or IP Address</label>
+                <div class="input-wrapper">
+                    <input type="text" id="domainInput" placeholder="Enter domain or IP address..." required>
+                    <button type="submit">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+                </div>
             </div>
-            <button type="submit">Search DNS</button>
         </form>
-        
+
         <!-- Tenant Lookup Form -->
-        <form id="tenant-form" style="display: none;">
+        <form id="tenant-form" class="hidden fade-in">
             <div class="form-group">
-                <input type="text" id="tenant-input" required placeholder="Enter tenant name or GUID">
+                <label for="tenant-input">Tenant Name or GUID</label>
+                <div class="input-wrapper">
+                    <input type="text" id="tenant-input" placeholder="Enter tenant name or GUID" required>
+                    <button type="submit">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+                </div>
             </div>
-            <button type="submit">Lookup Tenant</button>
         </form>
-        
-        <div class="loading" id="loading">Loading...</div>
-        
-        <!-- DNS Results -->
-        <div class="results" id="dns-results">
-            <table id="dns-result">
-                <tbody></tbody>
-            </table>
-        </div>
-        
-        <!-- Tenant Results -->
-        <div id="tenant-results" class="fade-in">
-            <div class="result-item">
-                <span class="result-label">Tenant Name:</span>
-                <span id="search-string"></span>
-            </div>
-            <div class="result-item">
-                <span class="result-label">Tenant ID:</span>
-                <span id="tenant-id"></span>
-            </div>
-            <div class="result-item">
-                <span class="result-label">Tenant Root:</span>
-                <span id="root-tenant"></span>
-            </div>
-            <button class="copy-btn" onclick="copyTenantResults()">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-                </svg>
-            </button>
+
+        <!-- Results Section -->
+        <div id="results" class="results hidden fade-in">
+            <!-- Results will be populated here -->
+            <svg class="copy-icon" onclick="copyResults()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                width="24" height="24">
+                <path
+                    d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+            </svg>
             <div class="copy-tooltip">Copied!</div>
         </div>
-        
-        <div id="error-message" class="error-message">
-            <h4>Not found.</h4>
-            <p>Uh oh. We couldn't find what you were looking for. Double check your search and try again.</p>
-        </div>
     </div>
-
     <script>
-        function switchToTab(tab) {
-            const dnsForm = document.getElementById('dns-form');
-            const tenantForm = document.getElementById('tenant-form');
-            const dnsResults = document.getElementById('dns-results');
-            const tenantResults = document.getElementById('tenant-results');
-            const toggleBtns = document.querySelectorAll('.toggle-btn');
-            
-            toggleBtns.forEach(btn => btn.classList.remove('active'));
-            
-            if (tab === 'dns') {
-                dnsForm.style.display = 'block';
-                tenantForm.style.display = 'none';
-                dnsResults.style.display = 'block';
-                tenantResults.style.display = 'none';
-                toggleBtns[0].classList.add('active');
-            } else {
-                dnsForm.style.display = 'none';
-                tenantForm.style.display = 'block';
-                dnsResults.style.display = 'none';
-                tenantResults.style.display = 'block';
-                toggleBtns[1].classList.add('active');
-            }
-            
-            // Reset results and error message
-            dnsResults.innerHTML = '<table id="dns-result"><tbody></tbody></table>';
-            tenantResults.style.display = 'none';
-            document.getElementById('error-message').style.display = 'none';
+        let currentTab = 'dns';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.tab-button:nth-child(${tab === 'dns' ? 1 : 2})`).classList.add('active');
+
+            document.getElementById('dns-form').classList.toggle('hidden', tab !== 'dns');
+            document.getElementById('tenant-form').classList.toggle('hidden', tab !== 'tenant');
+
+            document.getElementById('results').classList.add('hidden');
         }
 
+        document.getElementById('dns-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            // Implement DNS checking logic here
+            showResults('DNS results will be shown here');
 
-        // // Tenant Lookup functionality
-        // document.getElementById('tenant-form').addEventListener('submit', function(e) {
-        //     e.preventDefault();
-        //     const tenant = document.getElementById('tenant-input').value;
-        //     document.getElementById('loading').style.display = 'block';
-        //     // Simulate tenant lookup (replace with actual API call)
-        //     setTimeout(() => {
-        //         document.getElementById('loading').style.display = 'none';
-        //         if (tenant.toLowerCase() === 'example') {
-        //             document.getElementById('search-string').textContent = tenant;
-        //             document.getElementById('tenant-id').textContent = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
-        //             document.getElementById('root-tenant').textContent = 'example.onmicrosoft.com';
-        //             document.getElementById('tenant-results').style.display = 'block';
-        //             document.getElementById('error-message').style.display = 'none';
-        //         } else {
-        //             document.getElementById('tenant-results').style.display = 'none';
-        //             document.getElementById('error-message').style.display = 'block';
-        //         }
-        //     }, 1000);
-        // });
+        });
 
-        function copyTenantResults() {
-            const tenantName = document.getElementById('search-string').textContent;
-            const tenantId = document.getElementById('tenant-id').textContent;
-            const tenantRoot = document.getElementById('root-tenant').textContent;
-            const textToCopy = `Tenant Name: ${tenantName}\nTenant ID: ${tenantId}\nTenant Root: ${tenantRoot}`;
-            
-            navigator.clipboard.writeText(textToCopy).then(() => {
+        document.getElementById('tenant-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            // Implement tenant lookup logic here
+            showResults('Tenant lookup results will be shown here');
+        });
+
+        function showResults(content) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = content + resultsDiv.innerHTML.slice(resultsDiv.innerHTML.indexOf('<svg'));
+            resultsDiv.classList.remove('hidden');
+        }
+
+        function copyResults() {
+            const resultsText = document.getElementById('results').innerText;
+            navigator.clipboard.writeText(resultsText).then(() => {
                 const tooltip = document.querySelector('.copy-tooltip');
                 tooltip.classList.add('show');
                 setTimeout(() => tooltip.classList.remove('show'), 2000);
@@ -398,4 +325,5 @@
         }
     </script>
 </body>
+
 </html>
